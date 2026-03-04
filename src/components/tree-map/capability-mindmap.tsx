@@ -120,8 +120,10 @@ export function CapabilityMindmap() {
   // --- Multi-app highlight set ---
   const multiAppIds = useMemo(() => {
     if (!highlightMultiApps) return new Set<string>()
+    // Only count L3 nodes: an app is "multi-app" if it appears in more than one L3 capability
     const appCapCount = new Map<string, number>()
     for (const cap of visibleCaps) {
+      if (cap.level !== 3) continue
       for (const app of cap.applications) {
         appCapCount.set(app.id, (appCapCount.get(app.id) ?? 0) + 1)
       }
@@ -130,14 +132,17 @@ export function CapabilityMindmap() {
     for (const [appId, count] of appCapCount) {
       if (count > 1) multiApps.add(appId)
     }
+    // Highlight L3 caps that contain a multi-app, but exclude muted nodes
     const result = new Set<string>()
     for (const cap of visibleCaps) {
+      if (cap.level !== 3) continue
+      if (mutedNodes.has(cap.id)) continue
       if (cap.applications.some((a) => multiApps.has(a.id))) {
         result.add(cap.id)
       }
     }
     return result
-  }, [visibleCaps, highlightMultiApps])
+  }, [visibleCaps, highlightMultiApps, mutedNodes])
 
   const selectedCap = useMemo(
     () => capabilities.find((c) => c.id === selectedId) ?? null,
@@ -298,7 +303,13 @@ export function CapabilityMindmap() {
           <Button
             variant={layoutMode === 'star' ? 'default' : 'outline'}
             className="h-8 gap-1.5 px-3 text-xs"
-            onClick={() => setLayoutMode('star')}
+            onClick={() => {
+              setLayoutMode('star')
+              setCustomPositions({})
+              savePositions({})
+              setPan({ x: 0, y: 0 })
+              setScale(0.75)
+            }}
           >
             <Sun className="h-3.5 w-3.5" />
             Radial
@@ -306,7 +317,13 @@ export function CapabilityMindmap() {
           <Button
             variant={layoutMode === 'tree' ? 'default' : 'outline'}
             className="h-8 gap-1.5 px-3 text-xs"
-            onClick={() => setLayoutMode('tree')}
+            onClick={() => {
+              setLayoutMode('tree')
+              setCustomPositions({})
+              savePositions({})
+              setPan({ x: 0, y: 0 })
+              setScale(0.75)
+            }}
           >
             <GitFork className="h-3.5 w-3.5" />
             Tree
