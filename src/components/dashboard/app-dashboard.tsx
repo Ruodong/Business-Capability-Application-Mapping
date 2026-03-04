@@ -19,6 +19,16 @@ function getTone(domain: string) {
   return DOMAIN_TONE_MAP[domain] ?? 'slate'
 }
 
+const PORTFOLIO_TONE_MAP: Record<string, 'violet' | 'blue' | 'emerald' | 'amber'> = {
+  Invest: 'violet',
+  Run: 'blue',
+  Grow: 'emerald',
+}
+
+function getPortfolioTone(portfolio: string) {
+  return PORTFOLIO_TONE_MAP[portfolio] ?? 'amber'
+}
+
 export function AppDashboard() {
   const { state } = useDataContext()
   const { applications } = state
@@ -97,9 +107,15 @@ export function AppDashboard() {
                   {app.appSolutionType}
                 </p>
               </div>
-              <Badge tone={app.appStatus === 'Active' ? 'emerald' : app.appStatus === 'Planned' ? 'blue' : 'amber'}>
-                {app.appStatus}
-              </Badge>
+              <div className="flex flex-wrap gap-1.5">
+                <Badge tone={app.appStatus === 'Active' ? 'emerald' : app.appStatus === 'Planned' ? 'blue' : 'amber'}>
+                  {app.appStatus}
+                </Badge>
+                {app.geo && <Badge tone="cyan">{app.geo}</Badge>}
+                {app.portfolioMgt && (
+                  <Badge tone={getPortfolioTone(app.portfolioMgt)}>{app.portfolioMgt}</Badge>
+                )}
+              </div>
             </div>
 
             {app.capabilities.length > 0 && (
@@ -120,13 +136,11 @@ export function AppDashboard() {
               </div>
             )}
 
-            <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-500">
-              <span>Geo: {app.geo || 'N/A'}</span>
-              <span>&middot;</span>
-              <span>Portfolio: {app.portfolioMgt || 'N/A'}</span>
-              <span>&middot;</span>
-              <span>Function: {app.bizFunction || 'N/A'}</span>
-            </div>
+            {app.bizFunction && (
+              <div className="mt-2 text-xs text-slate-400">
+                Function: {app.bizFunction}
+              </div>
+            )}
           </Card>
         ))}
       </div>
