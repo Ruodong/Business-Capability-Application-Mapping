@@ -120,6 +120,9 @@ export function CapabilityDashboard() {
                       {cap.nameCn && (
                         <p className="mb-1.5 text-xs text-slate-400">{cap.nameCn}</p>
                       )}
+                      {cap.description && (
+                        <p className="mb-1.5 text-xs leading-relaxed text-slate-500">{cap.description}</p>
+                      )}
                       {cap.applications.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
                           {cap.applications.map((app) => (
