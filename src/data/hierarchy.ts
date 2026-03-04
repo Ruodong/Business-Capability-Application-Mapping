@@ -29,17 +29,19 @@ export function buildHierarchy(rows: ReadonlyArray<ExcelRow>): DataState {
   )
 
   const l1Nodes: CapNode[] = l1DomainNames.map((domain) => {
-    const domainRows = validRows.filter((r) => r.lv1Domain === domain)
+    const id = `L1-${domain}`
+    // Only apps explicitly mapped to this L1 node's own bcId (not bubbled up from children)
+    const directRows = validRows.filter((r) => r.lv1Domain === domain && r.bcId === id)
     return {
-      id: `L1-${domain}`,
+      id,
       name: domain,
       nameCn: '',
       level: 1 as const,
       parentId: null,
       domain,
       description: '',
-      appCount: collectApps(domainRows).length,
-      applications: collectApps(domainRows),
+      appCount: collectApps(directRows).length,
+      applications: collectApps(directRows),
     }
   })
 
@@ -50,10 +52,11 @@ export function buildHierarchy(rows: ReadonlyArray<ExcelRow>): DataState {
   )
 
   const l2Nodes: CapNode[] = l2Pairs.map((pair) => {
-    const subRows = validRows.filter(
-      (r) => r.lv1Domain === pair.domain && r.lv2SubDomain === pair.subDomain,
-    )
     const id = pair.parentBcId || `L2-${pair.domain}-${pair.subDomain}`
+    // Only apps explicitly mapped to this L2 node's own bcId (not bubbled up from L3 children)
+    const directRows = validRows.filter(
+      (r) => r.lv1Domain === pair.domain && r.lv2SubDomain === pair.subDomain && r.bcId === id,
+    )
     return {
       id,
       name: pair.subDomain,
@@ -62,8 +65,8 @@ export function buildHierarchy(rows: ReadonlyArray<ExcelRow>): DataState {
       parentId: `L1-${pair.domain}`,
       domain: pair.domain,
       description: '',
-      appCount: collectApps(subRows).length,
-      applications: collectApps(subRows),
+      appCount: collectApps(directRows).length,
+      applications: collectApps(directRows),
     }
   })
 
